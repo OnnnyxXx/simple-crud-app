@@ -25,11 +25,11 @@ public class UserService {
     }
 
     public User findByName(String user) {
-        List<User> optionalUser = userRepository.findByName(user);
+        Optional<User> optionalUser = userRepository.findByName(user);
         if (optionalUser.isEmpty()) {
             throw new IllegalStateException("User not find");
         }
-        return optionalUser.get(0);
+        return optionalUser.get();
     }
 
     public User findByEmail(String user) {
