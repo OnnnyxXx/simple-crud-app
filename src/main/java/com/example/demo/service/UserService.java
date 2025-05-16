@@ -19,28 +19,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> userList() {
-        return userRepository.findAll();
-
-    }
-
-    public User findByName(String user) {
-        Optional<User> optionalUser = userRepository.findByName(user);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("User not find");
-        }
-        return optionalUser.get();
-    }
-
-    public User findByEmail(String user) {
-        Optional<User> optionalUser = userRepository.findByEmail(user);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("Email not find");
-        }
-        return optionalUser.get();
-    }
-
-
     public User create(User user) {
         Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
         if (optionalUser.isPresent()) {
@@ -50,14 +28,25 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void delete(Long id) {
-        Optional<User> userOption = userRepository.findById(id);
+    public List<User> userList() {
+        return userRepository.findAll();
 
-        if (userOption.isEmpty()) {
-            throw new IllegalStateException("Юзера с " + "id->" + id + " нет");
+    }
+
+    public User findByName(String user) {
+        Optional<User> optionalUser = userRepository.findByName(user);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalStateException("User не найден");
         }
+        return optionalUser.get();
+    }
 
-        userRepository.deleteById(id);
+    public User findByEmail(String user) {
+        Optional<User> optionalUser = userRepository.findByEmail(user);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalStateException("Email не найден");
+        }
+        return optionalUser.get();
     }
 
     @Transactional
@@ -71,7 +60,7 @@ public class UserService {
         if (email != null && !email.equals(user.getEmail())) {
             Optional<User> foundByEmail = userRepository.findByEmail(email);
             if (foundByEmail.isPresent()) {
-                throw new IllegalStateException("Юзер с таким имейлом уже существует");
+                throw new IllegalStateException("Юзер с таким email уже существует");
             }
             user.setEmail(email);
         }
@@ -79,6 +68,16 @@ public class UserService {
         if (name != null && !name.equals(user.getName())) {
             user.setName(name);
         }
+    }
+
+    public void delete(Long id) {
+        Optional<User> userOption = userRepository.findById(id);
+
+        if (userOption.isEmpty()) {
+            throw new IllegalStateException("Юзера с " + "id ->" + id + " нет");
+        }
+
+        userRepository.deleteById(id);
     }
 
 }

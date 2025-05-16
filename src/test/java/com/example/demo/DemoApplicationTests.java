@@ -6,8 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,17 +18,13 @@ class DemoApplicationTests {
     private MockMvc mockMvc;
 
     @Test
-	void contextLoads() {
-	}
-
-    @Test
     public void create() throws Exception {
         String user = """
                 {
                     "name": "test",
                     "email": "test@gmail.com",
                     "birth": "2025-05-16",
-                    "age": 32
+                    "age": 29
                 }""";
 
         mockMvc.perform(post("/api/v1/users/create")
@@ -41,16 +35,17 @@ class DemoApplicationTests {
     }
 
     @Test
-    public void findAll() throws Exception {
-        mockMvc.perform(get("/api/v1/users"))
+    public void update() throws Exception {
+        mockMvc.perform(put("/api/v1/users/update/1")
+                        .param("email", "qq@gmail.com")
+                        .param("name", "TTT"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
-
     @Test
-    public void findByEmail() throws Exception {
-        mockMvc.perform(get("/api/v1/users/email/testi@gmail.com"))
+    public void findAll() throws Exception {
+        mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -63,18 +58,9 @@ class DemoApplicationTests {
     }
 
     @Test
-    public void update() throws Exception {
-        mockMvc.perform(put("/api/v1/users/update/1")
-                        .param("email", "testi@gmail.com")
-                        .param("name", "TTT"))
+    public void findByEmail() throws Exception {
+        mockMvc.perform(get("/api/v1/users/email/qq@gmail.com"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
-
-//    @Test
-//    public void delete() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/delete/1"))
-//                .andExpect(status().isOk())
-//                .andDo(print());
-//    }
 }
