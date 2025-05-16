@@ -1,13 +1,80 @@
 package com.example.demo;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class DemoApplicationTests {
 
-	@Test
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
 	void contextLoads() {
 	}
 
+    @Test
+    public void create() throws Exception {
+        String user = """
+                {
+                    "name": "HHH",
+                    "email": "TESTI@gmail.com",
+                    "birth": "2025-05-16",
+                    "age": 32
+                }""";
+
+        mockMvc.perform(post("/api/v1/users/create")
+                        .content(user)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void findAll() throws Exception {
+        mockMvc.perform(get("/api/v1/users"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void findByName() throws Exception {
+        mockMvc.perform(get("/api/v1/users/HHH", ""))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void findByEmail() throws Exception {
+        mockMvc.perform(get("/api/v1/users/email/TESTI@gmail.com", ""))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+
+    @Test
+    public void update() throws Exception {
+        mockMvc.perform(put("/api/v1/users/update/4")
+                        .param("email", "test@gmail.com")
+                        .param("name", "TTT"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void delete() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/delete/4"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 }
