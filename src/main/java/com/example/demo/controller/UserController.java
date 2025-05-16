@@ -16,6 +16,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping("/create")
+    public User create(@RequestBody User user) {
+        return userService.create(user);
+
+    }
+
     @GetMapping()
     public List<User> findAll() {
         return userService.userList();
@@ -31,17 +37,6 @@ public class UserController {
         return userService.findByEmail(email);
     }
 
-    @PostMapping("/create")
-    public User create(@RequestBody User user) {
-        return userService.create(user);
-
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable("id") Long id) {
-        userService.delete(id);
-    }
-
     @PutMapping("/update/{id}")
     public void update(@PathVariable Long id,
                        @RequestParam(required = false) String email,
@@ -49,5 +44,10 @@ public class UserController {
 
         userService.update(id, email, name);
 
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable("id") Long id) {
+        userService.delete(id);
     }
 }
