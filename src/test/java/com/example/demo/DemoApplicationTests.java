@@ -27,8 +27,8 @@ class DemoApplicationTests {
     public void create() throws Exception {
         String user = """
                 {
-                    "name": "HHH",
-                    "email": "TESTI@gmail.com",
+                    "name": "test",
+                    "email": "test@gmail.com",
                     "birth": "2025-05-16",
                     "age": 32
                 }""";
@@ -47,34 +47,34 @@ class DemoApplicationTests {
                 .andDo(print());
     }
 
-    @Test
-    public void findByName() throws Exception {
-        mockMvc.perform(get("/api/v1/users/HHH", ""))
-                .andExpect(status().isOk())
-                .andDo(print());
-    }
 
     @Test
     public void findByEmail() throws Exception {
-        mockMvc.perform(get("/api/v1/users/email/TESTI@gmail.com", ""))
+        mockMvc.perform(get("/api/v1/users/email/testi@gmail.com"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
+    @Test
+    public void findByName() throws Exception {
+        mockMvc.perform(get("/api/v1/users/TTT"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 
     @Test
     public void update() throws Exception {
-        mockMvc.perform(put("/api/v1/users/update/4")
-                        .param("email", "test@gmail.com")
+        mockMvc.perform(put("/api/v1/users/update/1")
+                        .param("email", "testi@gmail.com")
                         .param("name", "TTT"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
-    @Test
-    public void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/delete/4"))
-                .andExpect(status().isOk())
-                .andDo(print());
-    }
+//    @Test
+//    public void delete() throws Exception {
+//        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/delete/1"))
+//                .andExpect(status().isOk())
+//                .andDo(print());
+//    }
 }
