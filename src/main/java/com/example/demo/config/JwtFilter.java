@@ -11,6 +11,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -34,7 +36,7 @@ public class JwtFilter extends GenericFilterBean {
             final Claims claims = jwtProvider.getAccessClaims(token);
             final JwtAuthentication jwtInfoToken = JwtUtils.generate(claims);
             jwtInfoToken.setAuthenticated(true);
-//            SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
+            SecurityContextHolder.getContext().setAuthentication((Authentication) jwtInfoToken);
         }
         fc.doFilter(request, response);
     }
