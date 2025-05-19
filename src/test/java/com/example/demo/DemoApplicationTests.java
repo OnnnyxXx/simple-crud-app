@@ -1,5 +1,8 @@
 package com.example.demo;
 
+import com.example.demo.repository.User;
+import com.example.demo.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,19 +21,37 @@ class DemoApplicationTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private User savedUser;
+
+    @BeforeEach
+    public void setup() {
+        userRepository.deleteAll();
+
+        savedUser = new User();
+        savedUser.setLogin("Test");
+        savedUser.setEmail("test@gmail.com");
+        savedUser.setPassword("7474712:L");
+        savedUser.setFirstName("Testi");
+        savedUser.setLastName("Fresti");
+        userRepository.save(savedUser);
+    }
+
     @Test
     public void create() throws Exception {
-        String user = """
+        String userJson = """
                 {
-                    "login": "Test",
-                    "email": "test@gmail.com",
+                    "login": "NewTest",
+                    "email": "newtest@gmail.com",
                     "password": "7474712:L",
-                    "firstName": "Testi",
-                    "lastName": "Fresti"
+                    "firstName": "New",
+                    "lastName": "User "
                 }""";
 
         mockMvc.perform(post("/api/v1/users/create")
-                        .content(user)
+                        .content(userJson)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -38,7 +59,7 @@ class DemoApplicationTests {
 
     @Test
     public void update() throws Exception {
-        mockMvc.perform(put("/api/v1/users/update/1")
+        mockMvc.perform(put("/api/v1/users/update/" + savedUser.getId())
                         .param("email", "qq@gmail.com")
                         .param("name", "TTT"))
                 .andExpect(status().isOk())
@@ -54,14 +75,14 @@ class DemoApplicationTests {
 
     @Test
     public void findByName() throws Exception {
-        mockMvc.perform(get("/api/v1/users/TTT"))
+        mockMvc.perform(get("/api/v1/users/" + savedUser.getFirstName()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
     @Test
     public void findByEmail() throws Exception {
-        mockMvc.perform(get("/api/v1/users/email/qq@gmail.com"))
+        mockMvc.perform(get("/api/v1/users/email/" + savedUser.getEmail()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
