@@ -1,5 +1,7 @@
 package com.example.demo.auth;
 
+import com.example.demo.repository.User;
+import com.example.demo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,22 @@ public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     public void setup() {
+        // Очистить базу данных перед каждым тестом
+        userRepository.deleteAll();
 
+        // Создать тестового пользователя
+        User user = new User();
+        user.setLogin("Test");
+        user.setEmail("test@gmail.com");
+        user.setPassword("7474712:L");
+        user.setFirstName("Testi");
+        user.setLastName("Fresti");
+        userRepository.save(user);
     }
 
     @Test
