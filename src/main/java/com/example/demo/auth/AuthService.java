@@ -7,6 +7,8 @@ import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,6 +25,7 @@ public class AuthService {
     public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
         final User user = userService.getByLogin(authRequest.getLogin())
                 .orElseThrow(() -> new AuthException("Пользователь не найден"));
+
 
         if (user.getPassword().equals(authRequest.getPassword())) {
             final String accessToken = jwtProvider.generateAccessToken(user);
@@ -67,8 +70,8 @@ public class AuthService {
         throw new AuthException("Невалидный JWT токен");
     }
 
-//    public JwtAuthentication getAuthInfo() {
-//        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
-//    }
+    public Authentication getAuthInfo() {
+        return  SecurityContextHolder.getContext().getAuthentication();
+    }
 
 }
