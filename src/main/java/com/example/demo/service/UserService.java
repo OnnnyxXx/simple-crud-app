@@ -1,11 +1,10 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.repository.User;
@@ -24,7 +23,6 @@ public class UserService {
         if (optionalUser.isPresent()) {
             throw new IllegalStateException("Юзер с таким email уже есть");
         }
-        user.setAge(Period.between(user.getBirth(), LocalDate.now()).getYears());
         return userRepository.save(user);
     }
 
@@ -33,12 +31,16 @@ public class UserService {
 
     }
 
-    public User findByName(String user) {
-        Optional<User> optionalUser = userRepository.findByName(user);
+    public User findByName(String firstName) {
+        Optional<User> optionalUser = userRepository.findByName(firstName);
         if (optionalUser.isEmpty()) {
             throw new IllegalStateException("User не найден");
         }
         return optionalUser.get();
+    }
+
+    public Optional<User> getByLogin(@NonNull String login) {
+        return userRepository.getByLogin(login);
     }
 
     public User findByEmail(String user) {
@@ -65,8 +67,8 @@ public class UserService {
             user.setEmail(email);
         }
 
-        if (name != null && !name.equals(user.getName())) {
-            user.setName(name);
+        if (name != null && !name.equals(user.getFirstName())) {
+            user.setFirstName(name);
         }
     }
 

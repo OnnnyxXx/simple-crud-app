@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -21,10 +22,11 @@ class DemoApplicationTests {
     public void create() throws Exception {
         String user = """
                 {
-                    "name": "test",
+                    "login": "Test",
                     "email": "test@gmail.com",
-                    "birth": "2025-05-16",
-                    "age": 29
+                    "password": "7474712:L",
+                    "firstName": "Testi",
+                    "lastName": "Fresti"
                 }""";
 
         mockMvc.perform(post("/api/v1/users/create")

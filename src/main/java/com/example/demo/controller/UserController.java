@@ -28,8 +28,8 @@ public class UserController {
     }
 
     @GetMapping("/{name}")
-    public User findByName(@PathVariable("name") String name) {
-        return userService.findByName(name);
+    public User findByName(@PathVariable("name") String firstName) {
+        return userService.findByName(firstName);
     }
 
     @GetMapping("/email/{email}")
