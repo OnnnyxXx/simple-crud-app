@@ -32,7 +32,7 @@ public class AuthControllerTest {
         // Создать тестового пользователя
         User user = new User();
         user.setLogin("Test");
-        user.setEmail("test@gmail.com");
+        user.setEmail("testi@gmail.com");
         user.setPassword("7474712:L");
         user.setFirstName("Testi");
         user.setLastName("Fresti");
