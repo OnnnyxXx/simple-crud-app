@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.excaption.AppError;
+import com.example.demo.repository.UserDto;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class UserService {
 
     public ResponseEntity<?> create(User user) {
         try {
-            Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
+            Optional<UserDto> optionalUser = userRepository.findByEmail(user.getEmail());
             if (optionalUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(optionalUser.get().getEmail() + " уже есть!");
@@ -37,20 +38,20 @@ public class UserService {
 
     }
 
-    public List<User> userList() {
-        return userRepository.findAll();
+    public List<UserDto> userList() {
+        return userRepository.findAllUsers();
     }
 
     public ResponseEntity<?> findByName(String firstName) {
         try {
-            Optional<User> optionalUser = userRepository.findByName(firstName);
+            List<UserDto> optionalUser = userRepository.findByName(firstName);
 
-            if (optionalUser.isPresent()) {
-                return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
-            } else {
+            if (optionalUser.isEmpty()) {
                 return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                        "Пользователь с -> " + firstName + " не найден"),
+                        "Пользователи с -> " + firstName + " не найдены"),
                         HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(optionalUser, HttpStatus.OK);
             }
 
         } catch (Exception errorException) {
@@ -62,7 +63,7 @@ public class UserService {
 
     public ResponseEntity<?> findByEmail(String email) {
         try {
-            Optional<User> optionalUser = userRepository.findByEmail(email);
+            Optional<UserDto> optionalUser = userRepository.findByEmail(email);
 
             if (optionalUser.isPresent()) {
                 return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
@@ -91,7 +92,7 @@ public class UserService {
         User user = optionalUser.get();
 
         if (email != null && !email.equals(user.getEmail())) {
-            Optional<User> foundByEmail = userRepository.findByEmail(email);
+            Optional<UserDto> foundByEmail = userRepository.findByEmail(email);
             if (foundByEmail.isPresent()) {
                 throw new IllegalStateException("Юзер с таким email уже существует");
             }

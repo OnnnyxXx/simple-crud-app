@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.repository.User;
+import com.example.demo.repository.UserDto;
 import com.example.demo.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<User> findAll() {
+    public List<UserDto> findAll() {
         return userService.userList();
     }
 
