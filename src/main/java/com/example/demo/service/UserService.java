@@ -3,6 +3,7 @@ package com.example.demo.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.excaption.AppError;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
@@ -21,47 +22,64 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User create(User user) {
-        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        if (optionalUser.isPresent()) {
-            throw new IllegalStateException("Юзер с таким email уже есть");
+    public ResponseEntity<?> create(User user) {
+        try {
+            Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
+            if (optionalUser.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(optionalUser.get().getEmail() + " уже есть!");
+            }
+            return ResponseEntity.ok(userRepository.save(user));
+        } catch (HttpClientErrorException.Conflict errorException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorException);
+
         }
-        return userRepository.save(user);
+
     }
 
     public List<User> userList() {
         return userRepository.findAll();
-
     }
 
     public ResponseEntity<?> findByName(String firstName) {
         try {
             Optional<User> optionalUser = userRepository.findByName(firstName);
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Пользователь с -> " + firstName + " не найден");
-            }
-            return ResponseEntity.ok(optionalUser.get());
-        } catch (HttpClientErrorException.NotFound errorException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorException);
-        }
-    }
 
-    public Optional<User> getByLogin(@NonNull String login) {
-        return userRepository.getByLogin(login);
+            if (optionalUser.isPresent()) {
+                return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                        "Пользователь с -> " + firstName + " не найден"),
+                        HttpStatus.NOT_FOUND);
+            }
+
+        } catch (Exception errorException) {
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Произошла ошибка: " + errorException.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public ResponseEntity<?> findByEmail(String email) {
         try {
             Optional<User> optionalUser = userRepository.findByEmail(email);
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Пользователь с -> " + email + " не найден");
+
+            if (optionalUser.isPresent()) {
+                return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                        "Пользователь с -> " + email + " не найден"),
+                        HttpStatus.NOT_FOUND);
             }
-            return ResponseEntity.ok(optionalUser.get());
-        } catch (HttpClientErrorException.NotFound errorException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorException);
+        } catch (Exception errorException) {
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Произошла ошибка: " + errorException.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public Optional<User> getByLogin(@NonNull String login) {
+        return userRepository.getByLogin(login);
     }
 
     @Transactional
