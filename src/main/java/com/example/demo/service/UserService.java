@@ -3,12 +3,17 @@ package com.example.demo.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.excaption.AppError;
+import com.example.demo.repository.UserDto;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.repository.User;
 import com.example.demo.repository.UserRepository;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class UserService {
@@ -18,37 +23,64 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User create(User user) {
-        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        if (optionalUser.isPresent()) {
-            throw new IllegalStateException("Юзер с таким email уже есть");
+    public ResponseEntity<?> create(User user) {
+        try {
+            Optional<UserDto> optionalUser = userRepository.findByEmail(user.getEmail());
+            if (optionalUser.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(optionalUser.get().getEmail() + " уже есть!");
+            }
+            return ResponseEntity.ok(userRepository.save(user));
+        } catch (HttpClientErrorException.Conflict errorException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorException);
+
         }
-        return userRepository.save(user);
+
     }
 
-    public List<User> userList() {
-        return userRepository.findAll();
-
+    public List<UserDto> userList() {
+        return userRepository.findAllUsers();
     }
 
-    public User findByName(String firstName) {
-        Optional<User> optionalUser = userRepository.findByName(firstName);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("User не найден");
+    public ResponseEntity<?> findByName(String firstName) {
+        try {
+            List<UserDto> optionalUser = userRepository.findByName(firstName);
+
+            if (optionalUser.isEmpty()) {
+                return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                        "Пользователи с -> " + firstName + " не найдены"),
+                        HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(optionalUser, HttpStatus.OK);
+            }
+
+        } catch (Exception errorException) {
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Произошла ошибка: " + errorException.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return optionalUser.get();
+    }
+
+    public ResponseEntity<?> findByEmail(String email) {
+        try {
+            Optional<UserDto> optionalUser = userRepository.findByEmail(email);
+
+            if (optionalUser.isPresent()) {
+                return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                        "Пользователь с -> " + email + " не найден"),
+                        HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception errorException) {
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Произошла ошибка: " + errorException.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public Optional<User> getByLogin(@NonNull String login) {
         return userRepository.getByLogin(login);
-    }
-
-    public User findByEmail(String user) {
-        Optional<User> optionalUser = userRepository.findByEmail(user);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("Email не найден");
-        }
-        return optionalUser.get();
     }
 
     @Transactional
@@ -60,7 +92,7 @@ public class UserService {
         User user = optionalUser.get();
 
         if (email != null && !email.equals(user.getEmail())) {
-            Optional<User> foundByEmail = userRepository.findByEmail(email);
+            Optional<UserDto> foundByEmail = userRepository.findByEmail(email);
             if (foundByEmail.isPresent()) {
                 throw new IllegalStateException("Юзер с таким email уже существует");
             }
@@ -73,12 +105,6 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        Optional<User> userOption = userRepository.findById(id);
-
-        if (userOption.isEmpty()) {
-            throw new IllegalStateException("Юзера с " + "id ->" + id + " нет");
-        }
-
         userRepository.deleteById(id);
     }
 
