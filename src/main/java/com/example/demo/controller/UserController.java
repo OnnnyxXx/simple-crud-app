@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.repository.User;
 import com.example.demo.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,6 @@ public class UserController {
     @PostMapping("/create")
     public User create(@RequestBody User user) {
         return userService.create(user);
-
     }
 
     @GetMapping()
@@ -28,12 +28,12 @@ public class UserController {
     }
 
     @GetMapping("/{name}")
-    public User findByName(@PathVariable("name") String firstName) {
+    public ResponseEntity<?> findByName(@PathVariable("name") String firstName) {
         return userService.findByName(firstName);
     }
 
     @GetMapping("/email/{email}")
-    public User findByEmail(@PathVariable("email") String email) {
+    public ResponseEntity<?> findByEmail(@PathVariable("email") String email) {
         return userService.findByEmail(email);
     }
 

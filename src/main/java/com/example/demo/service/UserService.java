@@ -5,10 +5,13 @@ import java.util.Optional;
 
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.repository.User;
 import com.example.demo.repository.UserRepository;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class UserService {
@@ -31,24 +34,34 @@ public class UserService {
 
     }
 
-    public User findByName(String firstName) {
-        Optional<User> optionalUser = userRepository.findByName(firstName);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("User не найден");
+    public ResponseEntity<?> findByName(String firstName) {
+        try {
+            Optional<User> optionalUser = userRepository.findByName(firstName);
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Пользователь с -> " + firstName + " не найден");
+            }
+            return ResponseEntity.ok(optionalUser.get());
+        } catch (HttpClientErrorException.NotFound errorException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorException);
         }
-        return optionalUser.get();
     }
 
     public Optional<User> getByLogin(@NonNull String login) {
         return userRepository.getByLogin(login);
     }
 
-    public User findByEmail(String user) {
-        Optional<User> optionalUser = userRepository.findByEmail(user);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("Email не найден");
+    public ResponseEntity<?> findByEmail(String email) {
+        try {
+            Optional<User> optionalUser = userRepository.findByEmail(email);
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Пользователь с -> " + email + " не найден");
+            }
+            return ResponseEntity.ok(optionalUser.get());
+        } catch (HttpClientErrorException.NotFound errorException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorException);
         }
-        return optionalUser.get();
     }
 
     @Transactional
@@ -73,12 +86,6 @@ public class UserService {
     }
 
     public void delete(Long id) {
-        Optional<User> userOption = userRepository.findById(id);
-
-        if (userOption.isEmpty()) {
-            throw new IllegalStateException("Юзера с " + "id ->" + id + " нет");
-        }
-
         userRepository.deleteById(id);
     }
 
