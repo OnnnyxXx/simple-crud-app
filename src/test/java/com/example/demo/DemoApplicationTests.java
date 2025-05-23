@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -58,13 +59,21 @@ class DemoApplicationTests {
     }
 
     @Test
-    public void update() throws Exception {
-        mockMvc.perform(put("/api/v1/users/update/" + savedUser.getId())
-                        .param("email", "qq@gmail.com")
-                        .param("name", "TTT"))
+    public void patch() throws Exception {
+        String patchNode = """
+                {
+                    "firstName": "Lofl",
+                    "lastName": "Dofi",
+                    "email": "t@gmail.com"
+                }""";
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/update/" + savedUser.getId())
+                        .content(patchNode)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
+
 
     @Test
     public void findAll() throws Exception {
