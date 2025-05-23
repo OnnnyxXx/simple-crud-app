@@ -95,7 +95,7 @@ public class UserService {
     @Transactional
     public User update(Long id, JsonNode patchNode) throws IOException {
         User user = userRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity with id `%s` not found".formatted(id)));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с -> `%s` не найден".formatted(id)));
 
         objectMapper.readerForUpdating(user).readValue(patchNode);
 
