@@ -1,10 +1,13 @@
 package com.example.demo.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.excaption.AppError;
 import com.example.demo.repository.UserDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
@@ -13,14 +16,20 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.repository.User;
 import com.example.demo.repository.UserRepository;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
     }
 
     public ResponseEntity<?> create(User user) {
@@ -84,24 +93,13 @@ public class UserService {
     }
 
     @Transactional
-    public void update(Long id, String email, String name) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalStateException("Юзера с id: " + id + " не существует");
-        }
-        User user = optionalUser.get();
+    public User update(Long id, JsonNode patchNode) throws IOException {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с -> `%s` не найден".formatted(id)));
 
-        if (email != null && !email.equals(user.getEmail())) {
-            Optional<UserDto> foundByEmail = userRepository.findByEmail(email);
-            if (foundByEmail.isPresent()) {
-                throw new IllegalStateException("Юзер с таким email уже существует");
-            }
-            user.setEmail(email);
-        }
+        objectMapper.readerForUpdating(user).readValue(patchNode);
 
-        if (name != null && !name.equals(user.getFirstName())) {
-            user.setFirstName(name);
-        }
+        return userRepository.save(user);
     }
 
     public void delete(Long id) {
