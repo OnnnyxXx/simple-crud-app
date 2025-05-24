@@ -1,6 +1,9 @@
 package com.example.demo.repository;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +16,19 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @NotBlank(message = "Login Обязателен")
+    @Size(min = 4, max = 100)
     private String login;
+
+    @NotBlank(message = "Email Обязателен")
+    @Email(message = "Email Не валидный")
     private String email;
+
+    @NotBlank(message = "Password Обязателен")
+    @Size(min = 6, max = 100)
     private String password;
+
     private String firstName;
     private String lastName;
 
