@@ -1,14 +1,15 @@
 package com.example.demo.controller;
 
 import com.example.demo.repository.User;
-import com.example.demo.repository.UserDto;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -21,13 +22,13 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody User user) {
+    public ResponseEntity<?> create(@Valid @RequestBody User user) {
         return userService.create(user);
     }
 
-    @GetMapping()
-    public List<UserDto> findAll() {
-        return userService.userList();
+    @GetMapping("/all")
+    public PagedModel<User> getAll(Pageable pageable) {
+        return userService.getAll(pageable);
     }
 
     @GetMapping("/{name}")

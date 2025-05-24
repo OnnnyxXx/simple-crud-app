@@ -76,8 +76,8 @@ class DemoApplicationTests {
 
 
     @Test
-    public void findAll() throws Exception {
-        mockMvc.perform(get("/api/v1/users"))
+    public void getAll() throws Exception {
+        mockMvc.perform(get("/api/v1/users/all"))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
