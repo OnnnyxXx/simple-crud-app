@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       db:
-        image: postgres:latest
+        image: postgres:14
         env:
           POSTGRES_USER: myuser
           POSTGRES_PASSWORD: mypassword
@@ -36,3 +36,10 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+      - name: Run tests with Maven
+        run: mvn test
+      - name: Archive JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: target/*.jar
