@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.auth;
 
 import com.example.demo.repository.User;
 import com.example.demo.repository.UserRepository;
@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Test class for the {@link AuthController}
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AuthControllerTest {
@@ -68,3 +71,4 @@ public class AuthControllerTest {
                 .andDo(print());
     }
 }
+
