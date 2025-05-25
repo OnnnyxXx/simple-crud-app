@@ -38,8 +38,3 @@ jobs:
         run: mvn -B package --file pom.xml
       - name: Run tests with Maven
         run: mvn test
-      - name: publish test results
-        uses: actions/upload-artifact@v1
-        with:
-          name: my-artifact
-          path: target/*.jar
