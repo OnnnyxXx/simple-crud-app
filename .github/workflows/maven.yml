@@ -23,8 +23,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        working-directory: ./scr/test/java/
+        working-directory: /scr/test/java/
         run: mvn clean install -DskipTests=true
       - name: Run tests
-        working-directory: ./scr/test/java/
+        working-directory: /scr/test/java/
         run: mvn test
