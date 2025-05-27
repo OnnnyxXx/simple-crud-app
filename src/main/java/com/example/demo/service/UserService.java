@@ -3,7 +3,6 @@ package com.example.demo.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
 import com.example.demo.excaption.AppError;
 import com.example.demo.repository.UserDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,10 +46,12 @@ public class UserService {
 
     }
 
-    public PagedModel<User> getAll(Pageable pageable) {
+    public PagedModel<UserDto> getAll(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        return new PagedModel<>(users);
+        Page<UserDto> userDto = users.map(user -> new UserDto(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName()));
+        return new PagedModel<>(userDto);
     }
+
 
     public ResponseEntity<?> findByName(String firstName) {
         try {
