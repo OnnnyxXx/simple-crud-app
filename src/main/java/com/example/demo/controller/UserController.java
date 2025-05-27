@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.repository.User;
+import com.example.demo.repository.UserDto;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public PagedModel<User> getAll(Pageable pageable) {
+    public PagedModel<UserDto> getAll(Pageable pageable) {
         return userService.getAll(pageable);
     }
 
