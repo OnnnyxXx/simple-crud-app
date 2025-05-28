@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +26,7 @@ public class User {
     @Email(message = "Email Не валидный")
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "Password Обязателен")
     @Size(min = 6, max = 100)
     private String password;
