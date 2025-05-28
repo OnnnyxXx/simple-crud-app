@@ -54,6 +54,7 @@ public class AuthControllerTest {
                         .content(authRequest)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(cookie().exists("accessToken"))
                 .andDo(print());
     }
 
