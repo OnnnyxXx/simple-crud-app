@@ -48,7 +48,7 @@ class DemoApplicationTests {
                     "email": "newtest@gmail.com",
                     "password": "7474712:L",
                     "firstName": "New",
-                    "lastName": "User "
+                    "lastName": "User ",
                 }""";
 
         mockMvc.perform(post("/api/v1/users/create")
