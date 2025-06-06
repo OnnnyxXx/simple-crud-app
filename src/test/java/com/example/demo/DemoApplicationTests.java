@@ -58,6 +58,25 @@ class DemoApplicationTests {
                 .andDo(print());
     }
 
+
+    @Test
+    public void createError() throws Exception {
+        String userJson = """
+                {
+                    "login": "Test",
+                    "email": "test@gmail.com",
+                    "password": "7474712:L",
+                    "firstName": "Testi",
+                    "lastName": "Fresti "
+                }""";
+
+        mockMvc.perform(post("/api/v1/users/create")
+                        .content(userJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andDo(print());
+    }
+
     @Test
     public void patch() throws Exception {
         String patchNode = """
