@@ -2,25 +2,37 @@ package com.example.demo.auth;
 
 import com.example.demo.auth.jwt.*;
 import com.example.demo.repository.User;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.security.auth.message.AuthException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    private static final Logger logger = LogManager.getLogger(AuthService.class);
+
     private final UserService userService;
     private final Map<String, String> refreshStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
+
+    @Value("${jwt.secret.access}")
+    String jwtAccessSecret;
+
+    private final UserRepository userRepository;
 
     public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
         final User user = userService.getByLogin(authRequest.getLogin())
@@ -69,8 +81,26 @@ public class AuthService {
         throw new AuthException("Невалидный JWT токен");
     }
 
-    public Authentication getAuthInfo() {
-        return  SecurityContextHolder.getContext().getAuthentication();
+    public User getAuthInfo(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(jwtAccessSecret)
+                    .setAllowedClockSkewSeconds(60)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String userLogin = claims.get("login", String.class);
+
+            Optional<User> user = userRepository.getByLogin(userLogin);
+            if (user.isPresent()) return user.get();
+
+        } catch (ExpiredJwtException jwtException) {
+            System.out.println("JWT истек: " + jwtException.getMessage());
+        } catch (Exception e) {
+            logger.error("Ошибка: {}", e.getMessage(), e);
+        }
+        return null;
     }
 
 }
