@@ -34,21 +34,20 @@ public class UserService {
 
     public ResponseEntity<?> create(User user) {
         try {
-            Optional<UserDto> optionalUser = userRepository.findByEmail(user.getEmail());
+            Optional<User> optionalUser = userRepository.getByLogin(user.getLogin());
             if (optionalUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(optionalUser.get().getEmail() + " уже есть!");
+                        .body("Такой логин уже есть!");
             }
             return ResponseEntity.ok(userRepository.save(user));
         } catch (HttpClientErrorException.Conflict errorException) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorException);
-
         }
-
     }
 
     public PagedModel<UserDto> getAll(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
+
         Page<UserDto> userDto = users.map(user -> new UserDto(
                 user.getId(), user.getEmail(), user.getFirstName(), user.getLastName())
         );
