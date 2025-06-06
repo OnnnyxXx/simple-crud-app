@@ -2,13 +2,14 @@ package com.example.demo.auth;
 
 import com.example.demo.repository.User;
 import com.example.demo.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AuthControllerTest {
 
     @Autowired
@@ -43,6 +45,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Order(1)
     public void login() throws Exception {
         String authRequest = """
                 {
@@ -59,15 +62,23 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void getNewAccessToken() throws Exception {
-        String request = """
-                {
-                    "refreshToken": "zL1HB3Pch05Avfynovxrf/kpF9O2m4NCWKJUjEp27s9J2jEG3ifiKCGylaZ8fDeoONSTJP/wAzKawB8F9rOMNg=="
-                }""";
-
-        mockMvc.perform(post("/api/auth/token")
-                        .content(request)
+    @Order(2)
+    public void getAuthInfo() throws Exception {
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .content("""
+                        {
+                            "login": "Test",
+                            "password": "7474712:L"
+                        }
+                        """)
                         .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Cookie[] cookies = loginResult.getResponse().getCookies();
+
+        mockMvc.perform(get("/api/auth/info")
+                        .cookie(cookies))
                 .andExpect(status().isOk())
                 .andDo(print());
     }

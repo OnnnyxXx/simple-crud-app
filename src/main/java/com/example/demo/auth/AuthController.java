@@ -1,16 +1,17 @@
 package com.example.demo.auth;
 
-import com.example.demo.auth.jwt.JwtAuthentication;
 import com.example.demo.auth.jwt.JwtRequest;
 import com.example.demo.auth.jwt.JwtResponse;
 import com.example.demo.auth.jwt.RefreshJwtRequest;
+import com.example.demo.repository.User;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("api/auth")
@@ -39,8 +40,18 @@ public class AuthController {
     }
 
     @GetMapping("/info")
-    public JwtAuthentication getAuthInfo(Authentication authentication) {
-        return (JwtAuthentication) authService.getAuthInfo();
+    public User getAuthInfo(HttpServletRequest httpServletRequest) {
+        String token = null;
+        if (httpServletRequest.getCookies() != null) {
+            for (Cookie cookie : httpServletRequest.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
+        if (token == null) return null;
+
+        return authService.getAuthInfo(token);
     }
 
     @PostMapping("/token")
