@@ -1,6 +1,6 @@
 services:
 
-  demo:
+  backend:
     image: demo:latest
     build: .
     restart: "no"
