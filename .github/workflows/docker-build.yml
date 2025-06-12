@@ -1,63 +1,18 @@
-name: Build and Test Docker Image
+name: Docker Image CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Build with Maven
-        run: mvn clean package
-
-      - name: Build Docker image
-        run: docker build -t myapp:test .
-
-      - name: Start services with docker-compose
-        run: |
-          docker-compose up -d
-
-      - name: Run Postgres and backend containers
-        run: |
-          docker network create mynetwork || true
-          
-          docker run -d --name test-db --network mynetwork \
-            -e POSTGRES_USER=myuser \
-            -e POSTGRES_PASSWORD=mypassword \
-            -e POSTGRES_DB=mydatabase \
-            postgres:latest
-          
-          docker run -d --name test-backend --network mynetwork -p 8080:8080 \
-            -e SPRING_DATASOURCE_URL=jdbc:postgresql://test-db:5432/mydatabase \
-            -e SPRING_DATASOURCE_USERNAME=myuser \
-            -e SPRING_DATASOURCE_PASSWORD=mypassword \
-            myapp:test
-          
-          for i in $(seq 1 30); do
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/v1/users/all)
-            if [ "$status_code" -eq 200 ]; then
-              echo "Application endpoint is ready with status 200"
-              break
-            fi
-            echo "Waiting for application to return 200..."
-            sleep 1
-          done
-          
-          docker stop test-backend test-db
-          docker rm test-backend test-db
-    
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
