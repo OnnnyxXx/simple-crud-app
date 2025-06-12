@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk:21-jdk-alpine AS build
+FROM bellsoft/liberica-openjre-alpine:21-cds AS layers
 WORKDIR /application
 COPY target/*.jar demo-1.jar
 RUN java -Djarmode=tools -jar demo-1.jar extract --layers --destination extracted
