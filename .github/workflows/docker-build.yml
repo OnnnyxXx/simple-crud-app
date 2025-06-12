@@ -28,6 +28,10 @@ jobs:
       - name: Build Docker image
         run: docker build -t myapp:test .
 
+      - name: Start services with docker-compose
+        run: |
+          docker-compose up -d
+
       - name: Run container and wait for readiness
         run: |
           docker run --name test-container -d -p 8080:8080 myapp:test
