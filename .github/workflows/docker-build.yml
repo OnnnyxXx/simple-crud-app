@@ -22,6 +22,7 @@ jobs:
       - name: Build Docker image
         id: build_image
         run: |
+          mvn clean package
           docker build --file Dockerfile --tag myapp:test .
 
       - name: Run container and verify
