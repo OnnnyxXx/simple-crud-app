@@ -1,6 +1,19 @@
-version: '3.1'
-
 services:
+
+  backend:
+    image: demo:latest
+    build: .
+    restart: "no"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydatabase
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
 
   db:
     image: postgres:latest
@@ -21,8 +34,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
-    depends_on:
-      - db
 
 networks:
   mynetwork:
