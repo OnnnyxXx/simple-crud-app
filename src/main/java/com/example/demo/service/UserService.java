@@ -3,6 +3,7 @@ package com.example.demo.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.example.demo.excaption.AppError;
 import com.example.demo.repository.UserDto;
@@ -32,6 +33,7 @@ public class UserService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional
     public ResponseEntity<?> create(User user) {
         try {
             Optional<User> optionalUser = userRepository.getByLogin(user.getLogin());
@@ -45,15 +47,15 @@ public class UserService {
         }
     }
 
-    public PagedModel<UserDto> getAll(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
+    public ResponseEntity<List<UserDto>> getAll() {
+        List<User> users = userRepository.findAll();
 
-        Page<UserDto> userDto = users.map(user -> new UserDto(
+        List<UserDto> userDto = users.stream().map(user -> new UserDto(
                 user.getId(), user.getEmail(), user.getFirstName(), user.getLastName())
-        );
-        return new PagedModel<>(userDto);
-    }
 
+        ).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(userDto);
+    }
 
     public ResponseEntity<?> findByName(String firstName) {
         try {
