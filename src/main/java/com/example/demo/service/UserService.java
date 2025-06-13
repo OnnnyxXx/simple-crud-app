@@ -3,7 +3,6 @@ package com.example.demo.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.example.demo.excaption.AppError;
 import com.example.demo.repository.UserDto;
@@ -11,9 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
