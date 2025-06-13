@@ -10,9 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,6 +29,7 @@ public class UserService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional
     public ResponseEntity<?> create(User user) {
         try {
             Optional<User> optionalUser = userRepository.getByLogin(user.getLogin());
@@ -45,15 +43,15 @@ public class UserService {
         }
     }
 
-    public PagedModel<UserDto> getAll(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
+    public ResponseEntity<List<UserDto>> getAll() {
+        List<User> users = userRepository.findAll();
 
-        Page<UserDto> userDto = users.map(user -> new UserDto(
+        List<UserDto> userDto = users.stream().map(user -> new UserDto(
                 user.getId(), user.getEmail(), user.getFirstName(), user.getLastName())
-        );
-        return new PagedModel<>(userDto);
-    }
 
+        ).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(userDto);
+    }
 
     public ResponseEntity<?> findByName(String firstName) {
         try {

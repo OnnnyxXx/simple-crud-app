@@ -8,19 +8,21 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
     private static final Logger logger = LogManager.getLogger(AuthService.class);
@@ -34,9 +36,15 @@ public class AuthService {
 
     private final UserRepository userRepository;
 
+    public AuthService(UserService userService, JwtProvider jwtProvider, UserRepository userRepository) {
+        this.userService = userService;
+        this.jwtProvider = jwtProvider;
+        this.userRepository = userRepository;
+    }
+
     public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
         final User user = userService.getByLogin(authRequest.getLogin())
-                .orElseThrow(() -> new AuthException("Пользователь не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Пользователь не найден"));
 
         if (user.getPassword().equals(authRequest.getPassword())) {
             final String accessToken = jwtProvider.generateAccessToken(user);
@@ -46,6 +54,22 @@ public class AuthService {
         } else {
             throw new AuthException("Неправильный пароль");
         }
+    }
+
+    public void logout(HttpServletResponse response) {
+        jakarta.servlet.http.Cookie accessCookie = new jakarta.servlet.http.Cookie("accessToken", null);
+        accessCookie.setSecure(true);
+        accessCookie.setPath("/");
+        accessCookie.setValue(null);
+        accessCookie.setMaxAge(0);
+        response.addCookie(accessCookie);
+
+        jakarta.servlet.http.Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        accessCookie.setValue(null);
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
     }
 
     public JwtResponse getAccessToken(@NonNull String refreshToken) throws AuthException {

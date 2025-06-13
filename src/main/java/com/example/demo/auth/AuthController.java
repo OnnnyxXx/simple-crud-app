@@ -4,22 +4,27 @@ import com.example.demo.auth.jwt.JwtRequest;
 import com.example.demo.auth.jwt.JwtResponse;
 import com.example.demo.auth.jwt.RefreshJwtRequest;
 import com.example.demo.repository.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+@Tag(name = "Auth", description = "API для Регистрации и Авторизации")
 @RestController
 @RequestMapping("api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @Operation(summary = "Вход в систему", description = "В ответе возвращается статус и в cookie сохраняется jwt")
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest authRequest, HttpServletResponse response) throws AuthException {
         final JwtResponse token = authService.login(authRequest);
@@ -39,6 +44,13 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
+    @PostMapping("/logout")
+    public void logout(HttpServletResponse response) {
+        authService.logout(response);
+    }
+
+    @Operation(summary = "Информация об авторизированным пользователе",
+            description = "В ответе возвращается информация о пользователе, на основе jwt")
     @GetMapping("/info")
     public User getAuthInfo(HttpServletRequest httpServletRequest) {
         String token = null;
@@ -54,6 +66,8 @@ public class AuthController {
         return authService.getAuthInfo(token);
     }
 
+    @Operation(summary = "Получения токена",
+            description = "В ответе возвращается jwt")
     @PostMapping("/token")
     public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest request) throws AuthException {
         final JwtResponse token = authService.getAccessToken(request.getRefreshToken());

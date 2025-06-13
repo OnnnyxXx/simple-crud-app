@@ -82,5 +82,13 @@ public class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print());
     }
+
+    @Test
+    @Order(3)
+    public void logout() throws Exception {
+        mockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
 }
 
