@@ -31,10 +31,8 @@ public class AuthControllerTest {
 
     @BeforeEach
     public void setup() {
-        // Очистить базу данных перед каждым тестом
         userRepository.deleteAll();
 
-        // Создать тестового пользователя
         User user = new User();
         user.setLogin("Test");
         user.setEmail("testi@gmail.com");
@@ -88,6 +86,43 @@ public class AuthControllerTest {
     public void logout() throws Exception {
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    /// -------------------- NEGATIVE TEST ----------------------
+
+    @Test
+    public void loginError() throws Exception {
+        String authRequest = """
+                {
+                    "login": "T",
+                    "password": "   "
+                }""";
+
+        mockMvc.perform(post("/api/auth/login")
+                        .content(authRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(cookie().doesNotExist("accessToken"))
+                .andDo(print());
+    }
+
+    @Test
+    public void getAuthInfoError() throws Exception {
+        mockMvc.perform(post("/api/auth/login")
+                        .content("""
+                        {
+                            "login": "@@",
+                            "password": "1"
+                        }
+                        """)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        mockMvc.perform(get("/api/auth/info"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""))
                 .andDo(print());
     }
 }
