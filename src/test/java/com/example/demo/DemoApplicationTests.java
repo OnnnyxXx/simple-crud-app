@@ -58,25 +58,6 @@ class DemoApplicationTests {
                 .andDo(print());
     }
 
-
-    @Test
-    public void createError() throws Exception {
-        String userJson = """
-                {
-                    "login": "Test",
-                    "email": "test@gmail.com",
-                    "password": "7474712:L",
-                    "firstName": "Testi",
-                    "lastName": "Fresti "
-                }""";
-
-        mockMvc.perform(post("/api/v1/users/create")
-                        .content(userJson)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict())
-                .andDo(print());
-    }
-
     @Test
     public void patch() throws Exception {
         String patchNode = """
@@ -92,7 +73,6 @@ class DemoApplicationTests {
                 .andExpect(status().isOk())
                 .andDo(print());
     }
-
 
     @Test
     public void getAll() throws Exception {
@@ -114,4 +94,64 @@ class DemoApplicationTests {
                 .andExpect(status().isOk())
                 .andDo(print());
     }
+
+    /// -------------------- NEGATIVE TEST ----------------------
+
+    @Test
+    public void createError() throws Exception {
+        String userJson = """
+                {
+                    "login": "Test",
+                    "email": "test",
+                    "password": "   ",
+                    "firstName": "1",
+                    "lastName": "2"
+                }""";
+
+        mockMvc.perform(post("/api/v1/users/create")
+                        .content(userJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    public void patchError() throws Exception {
+        String patchNode = """
+                {
+                    "firstName":  " ",
+                    "lastName": " ",
+                    "email": "t"
+                }""";
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/update/" + savedUser.getId())
+                        .content(patchNode)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    public void getAllClear() throws Exception {
+        userRepository.deleteAll();
+
+        mockMvc.perform(get("/api/v1/users/all"))
+                .andExpect(content().string("[]"))
+                .andDo(print());
+    }
+
+    @Test
+    public void findByNameError() throws Exception {
+        mockMvc.perform(get("/api/v1/users/!@#"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void findByEmailError() throws Exception {
+        mockMvc.perform(get("/api/v1/users/email/8w1"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
 }
