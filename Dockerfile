@@ -1,6 +1,15 @@
+FROM maven:3.9-eclipse-temurin-21-alpine AS build
+WORKDIR /app
+
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+COPY src ./src
+RUN mvn clean package -DskipTests
+
 FROM bellsoft/liberica-openjre-alpine:21-cds AS layers
 WORKDIR /application
-COPY target/*.jar demo-1.jar
+COPY --from=build /app/target/*.jar demo-1.jar
 RUN java -Djarmode=tools -jar demo-1.jar extract --layers --destination extracted
 
 FROM bellsoft/liberica-openjre-alpine:21-cds
@@ -23,10 +32,4 @@ ENV JAVA_HEAP_DUMP_OPTS="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
 ENV JAVA_ON_OUT_OF_MEMORY_OPTS="-XX:+ExitOnOutOfMemoryError"
 ENV JAVA_NATIVE_MEMORY_TRACKING_OPTS="-XX:NativeMemoryTracking=summary -XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics"
 
-ENTRYPOINT java \
-    $JAVA_HEAP_DUMP_OPTS \
-    $JAVA_ON_OUT_OF_MEMORY_OPTS \
-    $JAVA_ERROR_FILE_OPTS \
-    $JAVA_NATIVE_MEMORY_TRACKING_OPTS \
-    $JAVA_CDS_OPTS \
-    -jar demo-1.jar
+ENTRYPOINT ["java", "-jar", "demo-1.jar"]
