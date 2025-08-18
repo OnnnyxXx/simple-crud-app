@@ -22,4 +22,5 @@ public class UserDto {
         this.firstName = firstName;
         this.lastName = lastName;
     }
+
 }
