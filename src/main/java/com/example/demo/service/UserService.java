@@ -48,7 +48,6 @@ public class UserService {
 
         List<UserDto> userDto = users.stream().map(user -> new UserDto(
                 user.getId(), user.getEmail(), user.getFirstName(), user.getLastName())
-
         ).toList();
         return ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
